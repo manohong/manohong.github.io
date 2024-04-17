@@ -1,12 +1,12 @@
-title: Atlas Jekyll Theme
+title: hongmano 
 desciption: >
-  A jekyll theme for personal website.
-email: yourusername@gmail.com
+ 저는 홍마노입니다.
+email: manojjang00@gmail.com
 baseurl: "/atlas-jekyll-theme" # the subpath of your site, e.g. /blog
 #replace nrdybhu1.github.io with your domainname.com
 url: "https://nrdybhu1.github.io" # the base hostname & protocol for your site
-twitter_username: jekyllrb
-github_username:  Jekyll
+twitter_username: manohong
+github_username:  manohong
 markdown: kramdown
 page_excerpts: true
 favicon: "/img/atlas.png"
