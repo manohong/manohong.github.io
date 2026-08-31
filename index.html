@@ -1,14 +1,724 @@
----
-title: Home
-layout: base
----
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Mano Hong (홍마노) — M.S. in Industrial Engineering, Sungkyunkwan University. Time-series anomaly detection and forecasting for industrial systems.">
+<style>
+  :root{color-scheme:light dark}
+  html,body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Signals & Shutdowns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 
-<h1>Hong mano Blogs</h1>
+<style>
+:root{
+  --ground:#F1F4F4;
+  --surface:#FFFFFF;
+  --ink:#161B1E;
+  --muted:#5D686E;
+  --faint:#8B979D;
+  --line:#DCE3E4;
+  --accent:#1C5F6B;
+  --accent-soft:#E2EEEF;
+  --alarm:#B96A18;
+  --shadow:0 1px 2px rgba(22,27,30,.05), 0 8px 24px -16px rgba(22,27,30,.25);
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --step:clamp(1rem,.92rem + .35vw,1.0625rem);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1113;
+    --surface:#151A1C;
+    --ink:#E4E9EA;
+    --muted:#96A2A7;
+    --faint:#6C787D;
+    --line:#232B2E;
+    --accent:#5FB6C4;
+    --accent-soft:#132A2E;
+    --alarm:#DE9A4D;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1113;
+  --surface:#151A1C;
+  --ink:#E4E9EA;
+  --muted:#96A2A7;
+  --faint:#6C787D;
+  --line:#232B2E;
+  --accent:#5FB6C4;
+  --accent-soft:#132A2E;
+  --alarm:#DE9A4D;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
 
-<div class="blog-post">
-    {% for post in site.posts limit:5 %}
-    <h2><a href="{{ post.url | prepend: site.baseurl | prepend: site.url }}">{{ post.title }}</a><h2>
-    <h3><i class="fas fa-calendar-alt"></i> {{ post.date | date_to_long_string }}</h3>
-    <p>{{ post.excerpt }} <a href="{{ post.url | absolute_url }}">[...]</a></p>
-    {% endfor -%}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--body);
+  font-size:var(--step);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+:root[data-lang="en"] [lang="ko"],
+:root[data-lang="ko"] [lang="en"]{display:none !important}
+
+.shell{
+  max-width:1180px;
+  margin:0 auto;
+  padding:0 clamp(1.25rem,4vw,3rem) 6rem;
+  display:grid;
+  grid-template-columns:minmax(0,17.5rem) minmax(0,1fr);
+  gap:clamp(2rem,5vw,4.5rem);
+  align-items:start;
+}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:2.5rem;padding-bottom:4rem}
+}
+
+.rail{
+  position:sticky;
+  top:0;
+  padding:clamp(2rem,5vw,3.5rem) 0 2rem;
+  display:flex;
+  flex-direction:column;
+  gap:1.5rem;
+}
+@media (max-width:900px){.rail{position:static;padding-bottom:0}}
+
+.monogram{
+  width:5.5rem;height:5.5rem;
+  border-radius:50%;
+  background:var(--accent-soft);
+  border:1px solid var(--line);
+  display:grid;place-items:center;
+  font-family:var(--display);
+  font-size:1.75rem;
+  color:var(--accent);
+  letter-spacing:.02em;
+  overflow:hidden;
+}
+.monogram img{width:100%;height:100%;object-fit:cover;display:block}
+
+.rail h1{
+  font-family:var(--display);
+  font-weight:400;
+  font-size:2rem;
+  line-height:1.1;
+  margin:0;
+  letter-spacing:-.01em;
+  text-wrap:balance;
+}
+.rail h1 .han{display:block;font-size:1.05rem;color:var(--muted);margin-top:.4rem;letter-spacing:.02em}
+.rail .role{
+  margin:.75rem 0 0;
+  color:var(--muted);
+  font-size:.9375rem;
+  line-height:1.5;
+}
+
+.contact{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.4rem;font-family:var(--mono);font-size:.8125rem}
+.contact a{
+  color:var(--muted);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:color .15s,border-color .15s;
+  display:inline-flex;gap:.5rem;align-items:baseline;
+}
+.contact a:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.contact .k{color:var(--faint);min-width:4.25rem;display:inline-block}
+.todo{color:var(--alarm)}
+
+.railnav{list-style:none;margin:0;padding:1.25rem 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:.15rem}
+.railnav a{
+  text-decoration:none;color:var(--muted);
+  font-family:var(--mono);font-size:.8125rem;
+  padding:.2rem 0;
+  display:flex;align-items:baseline;gap:.6rem;
+  transition:color .15s;
+}
+.railnav a:hover,.railnav a[aria-current="true"]{color:var(--ink)}
+.railnav a::before{
+  content:"";width:.5rem;height:1px;background:var(--line);flex:none;transform:translateY(-.25rem);transition:width .2s,background .2s;
+}
+.railnav a:hover::before,.railnav a[aria-current="true"]::before{width:1.1rem;background:var(--accent)}
+@media (max-width:900px){.railnav{flex-flow:row wrap;gap:.25rem 1.1rem}.railnav a::before{display:none}}
+
+.switches{display:flex;gap:.5rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.switches button{
+  font-family:var(--mono);font-size:.75rem;
+  background:transparent;color:var(--muted);
+  border:1px solid var(--line);border-radius:2px;
+  padding:.3rem .6rem;cursor:pointer;
+  transition:color .15s,border-color .15s;
+}
+.switches button:hover{color:var(--accent);border-color:var(--accent)}
+
+main{padding-top:clamp(2rem,5vw,3.5rem);min-width:0}
+
+.hero{margin-bottom:3.5rem}
+.thesis{
+  font-family:var(--display);
+  font-size:clamp(1.4rem,1.05rem + 1.35vw,2rem);
+  line-height:1.32;
+  font-weight:300;
+  margin:0 0 1.5rem;
+  max-width:30ch;
+  text-wrap:balance;
+}
+.thesis em{font-style:italic;color:var(--accent)}
+
+.trace{
+  position:relative;
+  border:1px solid var(--line);
+  border-radius:3px;
+  background:var(--surface);
+  padding:.75rem .75rem .5rem;
+  box-shadow:var(--shadow);
+}
+.trace canvas{display:block;width:100%;height:132px}
+.trace figcaption{
+  font-family:var(--mono);font-size:.6875rem;
+  color:var(--faint);
+  display:flex;justify-content:space-between;gap:1rem;
+  padding-top:.5rem;
+  letter-spacing:.04em;
+}
+.trace figcaption b{color:var(--alarm);font-weight:500}
+
+section{padding-top:2.75rem;scroll-margin-top:1.5rem}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:.6875rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--faint);
+  margin:0 0 1.25rem;
+  padding-bottom:.5rem;
+  border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.eyebrow span:last-child{color:var(--line)}
+
+.prose{max-width:62ch;color:var(--muted);margin:0 0 1rem}
+.prose strong{color:var(--ink);font-weight:500}
+
+.entries{display:flex;flex-direction:column;gap:1.4rem}
+.entry{display:grid;grid-template-columns:6.5rem minmax(0,1fr);gap:1.25rem}
+@media (max-width:560px){.entry{grid-template-columns:minmax(0,1fr);gap:.35rem}}
+.when{
+  font-family:var(--mono);font-size:.75rem;color:var(--faint);
+  padding-top:.28rem;font-variant-numeric:tabular-nums;letter-spacing:.02em;
+}
+.what h3{margin:0;font-size:1rem;font-weight:600;line-height:1.4;text-wrap:balance}
+.what .sub{margin:.15rem 0 0;color:var(--muted);font-size:.9375rem}
+.what .note{margin:.35rem 0 0;color:var(--faint);font-size:.875rem}
+.what .note code{font-family:var(--mono);font-size:.8125em;color:var(--muted)}
+
+.pub{
+  display:grid;grid-template-columns:6.5rem minmax(0,1fr);gap:1.25rem;
+  padding:1.1rem 0;border-bottom:1px solid var(--line);
+}
+.pub:first-of-type{padding-top:0}
+.pub:last-of-type{border-bottom:none}
+@media (max-width:560px){.pub{grid-template-columns:minmax(0,1fr);gap:.4rem}}
+.pub .venue{font-family:var(--mono);font-size:.75rem;color:var(--faint);padding-top:.3rem}
+.pub h3{margin:0;font-family:var(--display);font-weight:400;font-size:1.1875rem;line-height:1.35;text-wrap:balance}
+.pub .authors{margin:.35rem 0 0;font-size:.9375rem;color:var(--muted)}
+.pub .authors u{text-decoration:none;border-bottom:1.5px solid var(--accent);color:var(--ink)}
+.pub .journal{margin:.2rem 0 0;font-size:.9375rem;color:var(--muted)}
+.pub .journal i{color:var(--ink)}
+.status{
+  display:inline-block;font-family:var(--mono);font-size:.6875rem;
+  letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:2px;
+  padding:.05rem .4rem;margin-left:.4rem;color:var(--muted);
+  vertical-align:.08em;
+}
+.status.live{color:var(--alarm);border-color:var(--alarm)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,20rem),1fr));gap:1rem}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:1.15rem 1.25rem 1.25rem;
+  display:flex;flex-direction:column;gap:.55rem;
+  box-shadow:var(--shadow);
+}
+.card .tag{
+  font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);
+}
+.card h3{margin:0;font-size:1rem;font-weight:600;line-height:1.35;text-wrap:balance}
+.card p{margin:0;font-size:.9063rem;color:var(--muted);line-height:1.55}
+.metrics{
+  list-style:none;margin:.15rem 0 0;padding:.7rem 0 0;border-top:1px solid var(--line);
+  display:flex;flex-wrap:wrap;gap:.35rem .9rem;
+  font-family:var(--mono);font-size:.75rem;color:var(--faint);
+  font-variant-numeric:tabular-nums;
+}
+.metrics b{color:var(--ink);font-weight:500}
+
+.skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:1.25rem 2rem}
+.skills h3{
+  margin:0 0 .4rem;font-family:var(--mono);font-size:.6875rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);font-weight:400;
+}
+.skills p{margin:0;font-size:.9375rem;color:var(--muted);line-height:1.55}
+
+footer{
+  margin-top:4rem;padding-top:1.25rem;border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:.75rem;color:var(--faint);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="rail">
+    <!-- 사진을 넣으려면: <img src="profile.jpg" alt=""> 를 아래 div 안에 넣고 "MH" 를 지우세요 -->
+    <div class="monogram" aria-hidden="true">MH</div>
+
+    <div>
+      <h1>Mano Hong<span class="han">홍마노</span></h1>
+      <p class="role">
+        <span lang="en">M.S. in Industrial Engineering, Sungkyunkwan University. Time-series anomaly detection and forecasting for industrial systems.</span>
+        <span lang="ko">성균관대학교 산업공학과 석사. 산업 설비 데이터의 시계열 이상탐지·예측을 연구합니다.</span>
+      </p>
+    </div>
+
+    <ul class="contact">
+      <li><a href="mailto:manojjang00@gmail.com"><span class="k">Email</span>manojjang00@gmail.com</a></li>
+      <li><a href="https://github.com/manohong"><span class="k">GitHub</span>github.com/manohong</a></li>
+      <li><a href="#" class="todo"><span class="k">Scholar</span>scholar.google.com/________</a></li>
+      <li><a href="#" class="todo"><span class="k">CV</span>CV.pdf</a></li>
+    </ul>
+
+    <nav aria-label="Sections">
+      <ul class="railnav">
+        <li><a href="#news"><span lang="en">News</span><span lang="ko">소식</span></a></li>
+        <li><a href="#publications"><span lang="en">Publications</span><span lang="ko">논문</span></a></li>
+        <li><a href="#projects"><span lang="en">Projects</span><span lang="ko">프로젝트</span></a></li>
+        <li><a href="#education"><span lang="en">Education</span><span lang="ko">학력</span></a></li>
+        <li><a href="#experience"><span lang="en">Experience</span><span lang="ko">경력</span></a></li>
+        <li><a href="#awards"><span lang="en">Awards</span><span lang="ko">수상</span></a></li>
+        <li><a href="#skills"><span lang="en">Skills</span><span lang="ko">기술</span></a></li>
+      </ul>
+    </nav>
+
+    <div class="switches">
+      <button type="button" id="lang-btn" aria-label="Switch language">한국어</button>
+      <button type="button" id="theme-btn" aria-label="Switch theme">Dark</button>
+    </div>
+  </aside>
+
+  <main>
+
+    <div class="hero">
+      <p class="thesis">
+        <span lang="en">Machines fail loudly, but they warn <em>quietly</em>. My work is reading the warning — hours before the alarm, from sensors nobody labelled.</span>
+        <span lang="ko">설비는 요란하게 멈추지만, 조짐은 <em>조용하게</em> 옵니다. 라벨이 없는 센서 신호에서 경보가 울리기 몇십 시간 전의 그 조짐을 읽는 일을 합니다.</span>
+      </p>
+
+      <figure class="trace">
+        <canvas id="trace" width="1200" height="264" role="img"
+          aria-label="A sensor reconstruction-error trace that drifts upward and crosses a fixed threshold 48 hours before shutdown."></canvas>
+        <figcaption>
+          <span>RECONSTRUCTION ERROR / SENSOR 41 · CONV1D-AE</span>
+          <span><b>▲ FLAG</b> T−48H</span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <section id="news">
+      <p class="eyebrow"><span lang="en">News</span><span lang="ko">소식</span><span>001</span></p>
+      <div class="entries">
+        <div class="entry">
+          <div class="when">2026.08</div>
+          <div class="what">
+            <h3><span lang="en">6th place, BARAM 2026 wind power forecasting challenge</span><span lang="ko">제3회 풍력발전량 예측 AI 경진대회 BARAM 2026 최종 6위</span></h3>
+            <p class="sub"><span lang="en">DACON, 2,141 participants. 1st on the public leaderboard; 6th after the final presentation round.</span><span lang="ko">DACON, 참가 2,141명. 리더보드 Public 1위, 발표 평가를 거쳐 최종 6위.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2026.08</div>
+          <div class="what">
+            <h3><span lang="en">M.S. thesis completed — graduating August 2026</span><span lang="ko">석사 학위논문 완료 — 2026년 8월 졸업</span></h3>
+            <p class="sub"><span lang="en">Industrial Engineering, Sungkyunkwan University (QMoT Lab).</span><span lang="ko">성균관대학교 산업공학과 QMoT Lab.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2026.08</div>
+          <div class="what">
+            <h3><span lang="en">4th on the second-round leaderboard, SCPC 2026 (Samsung Electronics)</span><span lang="ko">2026 SCPC(삼성전자) AI 챌린지 2차 예선 리더보드 4위</span></h3>
+            <p class="sub"><span lang="en">Among the 40 code-verified entrants advancing from the first round. Solo track.</span><span lang="ko">코드 검증을 통과한 2차 예선 진출자 40명 중. 개인전.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2026.06</div>
+          <div class="what">
+            <h3><span lang="en">First-author manuscript submitted to <i>Energy</i></span><span lang="ko"><i>Energy</i> 저널에 단독 1저자 논문 투고</span></h3>
+            <p class="sub"><span lang="en">Joint work with Shell and BSP on offshore gas turbine shutdown precursors.</span><span lang="ko">Shell·BSP와의 해상 가스터빈 shutdown 조기 탐지 공동 연구.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2026.04</div>
+          <div class="what">
+            <h3><span lang="en">Joined a national R&amp;D program on refuelable aluminium–air batteries</span><span lang="ko">자원순환형 주유형 알루미늄 공기전지 국가 R&amp;D 과제 참여</span></h3>
+            <p class="sub"><span lang="en">SKKU Industry–Academic Cooperation Foundation. Scenario modelling and LCOS-based techno-economic analysis.</span><span lang="ko">성균관대학교 산학협력단. 시나리오 구축 및 LCOS 기반 경제성 분석 담당.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="publications">
+      <p class="eyebrow"><span lang="en">Publications</span><span lang="ko">논문</span><span>002</span></p>
+
+      <div class="pub">
+        <div class="venue">2026</div>
+        <div>
+          <h3><span lang="en">Early detection of shutdown precursors in offshore gas turbines with per-sensor convolutional autoencoders</span><span lang="ko">센서별 합성곱 오토인코더를 이용한 해상 가스터빈 shutdown 조기 탐지</span></h3>
+          <p class="authors"><u>Mano Hong</u><span lang="en"> (first author), with Shell &amp; Brunei Shell Petroleum</span><span lang="ko"> (단독 1저자), Shell·BSP 산업협력</span></p>
+          <p class="journal"><i>Energy</i> (Elsevier, SCIE)<span class="status live"><span lang="en">Under review</span><span lang="ko">심사 중</span></span></p>
+        </div>
+      </div>
+
+      <div class="pub">
+        <div class="venue">2026</div>
+        <div>
+          <h3><span lang="en">LLM-structured news signals for monthly aluminium price forecasting</span><span lang="ko">LLM으로 정형화한 뉴스 신호를 결합한 월별 알루미늄 가격 예측</span></h3>
+          <p class="authors"><u>Mano Hong</u><span lang="en"> et al.</span><span lang="ko"> 외</span></p>
+          <p class="journal"><i>International Journal of Forecasting</i><span class="status"><span lang="en">In preparation</span><span lang="ko">투고 준비 중</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <p class="eyebrow"><span lang="en">Selected Projects</span><span lang="ko">주요 프로젝트</span><span>003</span></p>
+      <div class="cards">
+
+        <article class="card">
+          <span class="tag">Anomaly detection</span>
+          <h3><span lang="en">Offshore gas turbine early warning</span><span lang="ko">해상 가스터빈 조기 경보</span></h3>
+          <p><span lang="en">99 sensors, 105,264 timestamps, a 48-hour warning horizon. Recast as event-level early warning rather than point-wise classification: a Noise Index with Otsu thresholding drops sensors unrelated to failure, per-sensor Conv1D autoencoders are pruned on validation loss, and normalised errors are fused by max with consecutive-<i>k</i> filtering to suppress false alarms. Trained on healthy operation only.</span><span lang="ko">99개 센서, 105,264 시점, 고장 48시간 전 경보가 목표. point-wise 분류 대신 event 단위 조기 경보로 문제를 재정의했습니다. Noise Index와 Otsu threshold로 고장과 무관한 센서를 제거하고, 센서별 독립 Conv1D 오토인코더를 validation loss 기반으로 pruning했으며, 정규화한 복원 오차를 max fusion과 consecutive-<i>k</i> 필터로 결합해 오경보를 억제했습니다. 정상 운전 데이터만으로 학습합니다.</span></p>
+          <ul class="metrics"><li><b>99</b> sensors</li><li><b>105,264</b> steps</li><li><b>T−48h</b> horizon</li></ul>
+        </article>
+
+        <article class="card">
+          <span class="tag">Forecasting · LLM</span>
+          <h3><span lang="en">News-conditioned aluminium price forecasting</span><span lang="ko">뉴스 결합 알루미늄 가격 예측</span></h3>
+          <p><span lang="en">17,093 articles (2010–2025) cleaned to 10,531, de-duplicated by TF-IDF similarity, then filtered to 4,278 price-relevant items by Llama-3. Topics via SBERT / UMAP / HDBSCAN / KeyBERT with an LLM-generated upper hierarchy; ModernFinBERT embeddings joined to price and exogenous series in an iTransformer. The LLM is used as a feature engine, not an answer generator.</span><span lang="ko">2010–2025년 기사 17,093건을 10,531건으로 정제하고 TF-IDF 유사도로 중복 보도 편향을 완화한 뒤, Llama-3로 가격 관련성을 판별해 4,278건을 남겼습니다. SBERT·UMAP·HDBSCAN·KeyBERT로 토픽을 구성하고 상위 계층은 LLM으로 생성했으며, ModernFinBERT 임베딩을 가격·외생변수와 함께 iTransformer에 결합했습니다. LLM을 답변 생성기가 아니라 feature 엔진으로 씁니다.</span></p>
+          <ul class="metrics"><li>MAE <b>117.72</b> <span>(naive 128.85)</span></li><li>R² <b>0.34</b> <span>(naive 0.20)</span></li></ul>
+        </article>
+
+        <article class="card">
+          <span class="tag">Forecasting · Evaluation</span>
+          <h3><span lang="en">Wind power forecasting under a step-shaped metric</span><span lang="ko">계단형 지표 아래의 풍력 발전량 예측</span></h3>
+          <p><span lang="en">Half the score came from a step function on error rate, so I approximated it with a smooth sigmoid surrogate and optimised it directly. Curtailment periods were identified from per-turbine SCADA output and their suppressed labels removed. After the leaderboard closed, a control experiment resampled the scoring window 2,000 times with predictions frozen: this metric's sampling noise is 5.5× that of a standard accuracy metric.</span><span lang="ko">배점의 절반이 오차율 계단 함수였기 때문에, 이를 시그모이드로 매끄럽게 근사한 대리 손실을 설계해 학습 목적함수에 직접 넣었습니다. 터빈별 SCADA 출력으로 정지 구간을 판정해 눌린 라벨을 학습에서 제거했습니다. 리더보드 종료 후에는 예측을 고정한 채 채점 구간만 2,000회 바꾸는 통제 실험으로, 이 지표의 표본 잡음이 정확도 지표의 5.5배임을 측정했습니다.</span></p>
+          <ul class="metrics"><li><b>6th</b> / 2,141</li><li>metric noise <b>5.5×</b></li></ul>
+        </article>
+
+        <article class="card">
+          <span class="tag">Manufacturing</span>
+          <h3><span lang="en">Semiconductor defect prediction (SECOM)</span><span lang="ko">반도체 공정 결함 예측 (SECOM)</span></h3>
+          <p><span lang="en">Severe class imbalance where a miss costs far more than a false positive. Six oversampling schemes compared; ADASYN synthesised the minority boundary best. PCA compressed 33 variables to 24 components at 91% retained variance, and a soft-voting ensemble over RF, GBM, SVM and XGBoost was thresholded at 0.48 from the precision–recall curve. SHAP, PFI and PDP name the variables behind each call.</span><span lang="ko">불량이 극히 적고, 미검이 오검출보다 훨씬 치명적인 문제였습니다. 6종의 오버샘플링을 비교해 소수 클래스 경계를 가장 정교하게 합성한 ADASYN을 택했고, PCA로 33개 변수를 변동성 91% 보존하며 24개 주성분으로 압축했습니다. RF·GBM·SVM·XGBoost의 Soft Voting 앙상블에 Precision-Recall Curve 기준 임계값 0.48을 적용했고, SHAP·PFI·PDP로 판정 근거 변수를 해석했습니다.</span></p>
+          <ul class="metrics"><li>F1 <b>0.735</b></li><li>PCA <b>33→24</b></li><li>threshold <b>0.48</b></li></ul>
+        </article>
+
+        <article class="card">
+          <span class="tag">On-device AI</span>
+          <h3><span lang="en">On-device agent with revocable memory</span><span lang="ko">철회 가능한 기억을 가진 온디바이스 에이전트</span></h3>
+          <p><span lang="en">Built with no GPU, no external LLM API and no network. Every memory is tagged with source, authority, scope and lifetime, and derivations are tracked so a user's retraction withdraws what was derived from it while leaving unrelated rules intact. Five experiments showed the small on-device model's apparent 70% accuracy was response bias, so it was given veto power only, with a rule auditor as fallback.</span><span lang="ko">GPU·외부 LLM API·네트워크가 모두 금지된 조건에서 구현했습니다. 모든 기억에 출처·권위·범위·수명을 태그하고 파생 관계를 추적해, 사용자의 철회가 파생 결과물까지 정확히 거둬들이되 무관한 규칙은 보존하도록 설계했습니다. 다섯 차례 실험으로 온디바이스 소형 모델의 겉보기 70% 정확도가 응답 편향임을 밝혀낸 뒤, 모델에는 거부권만 부여하고 규칙 감사관으로 넘어가게 재설계했습니다.</span></p>
+          <ul class="metrics"><li>recall <b>93%</b></li><li>false-block <b>0%</b></li><li><b>4th</b> / 40</li></ul>
+        </article>
+
+        <article class="card">
+          <span class="tag">Speech</span>
+          <h3><span lang="en">Spoken language processing pipeline</span><span lang="ko">음성언어처리 파이프라인</span></h3>
+          <p><span lang="en">Keyword spotting over 12 commands using MFCC and log-mel features with time/frequency masking and noise augmentation; an ASR model fine-tuned from a w2v-bert-2.0 encoder with CTC loss under a constrained GPU budget; and a real-time captioning and question-answering system combining VAD, speaker embeddings and Local Agreement.</span><span lang="ko">MFCC·log-mel spectrogram에 time/frequency masking과 noise augmentation을 적용한 12개 명령어 분류, 제한된 GPU 환경에서 w2v-bert-2.0 encoder를 CTC loss로 일부 layer만 fine-tuning한 ASR, 그리고 VAD·speaker embedding·Local Agreement를 결합한 실시간 자막·질의응답 시스템을 구현했습니다.</span></p>
+          <ul class="metrics"><li>KWS acc <b>95.58%</b></li><li>WER <b>12.24%</b></li></ul>
+        </article>
+
+      </div>
+    </section>
+
+    <section id="education">
+      <p class="eyebrow"><span lang="en">Education</span><span lang="ko">학력</span><span>004</span></p>
+      <div class="entries">
+        <div class="entry">
+          <div class="when">2025.03<br>— 2026.08</div>
+          <div class="what">
+            <h3><span lang="en">M.S., Industrial Engineering — Sungkyunkwan University</span><span lang="ko">성균관대학교 일반대학원 산업공학과 석사</span></h3>
+            <p class="sub"><span lang="en">QMoT Lab (Quantitative Management of Technology), advised by Prof. Junseok Shin. GPA 4.31 / 4.5.</span><span lang="ko">QMoT Lab (지도교수 신준석). 평점 4.31 / 4.5.</span></p>
+            <p class="note"><span lang="en">Coursework in numerical linear algebra and optimisation; research in time-series forecasting, anomaly detection and techno-economic analysis.</span><span lang="ko">수치적선형대수학·최적화 이수. 시계열 예측 및 이상탐지, 기술사업화 경제성 분석 연구.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2019.03<br>— 2025.02</div>
+          <div class="what">
+            <h3><span lang="en">B.S., Mathematics — Sungkyunkwan University</span><span lang="ko">성균관대학교 자연과학대학 수학과 이학사</span></h3>
+            <p class="sub"><span lang="en">Double major in Software Engineering. GPA 3.94 / 4.5 overall (94.4 / 100) — Mathematics 4.07, Software Engineering 4.21.</span><span lang="ko">소프트웨어공학 복수전공. 전체 평점 3.94 / 4.5 (백분율 94.4) — 수학 4.07, 소프트웨어공학 4.21.</span></p>
+            <p class="note"><span lang="en">Full CS core: data structures, algorithms, operating systems, computer architecture, networks, databases — plus AI, AI Project and Capstone Design.</span><span lang="ko">자료구조·알고리즘·운영체제·컴퓨터구조·네트워크·데이터베이스 등 CS 코어 전 과목 이수, 인공지능개론·인공지능프로젝트·캡스톤설계프로젝트 포함.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <p class="eyebrow"><span lang="en">Experience</span><span lang="ko">경력</span><span>005</span></p>
+      <div class="entries">
+        <div class="entry">
+          <div class="when">2026.04<br>— <span lang="en">present</span><span lang="ko">현재</span></div>
+          <div class="what">
+            <h3><span lang="en">Researcher — SKKU Industry–Academic Cooperation Foundation</span><span lang="ko">연구원 — 성균관대학교 산학협력단</span></h3>
+            <p class="sub"><span lang="en">National R&amp;D program on refuelable, resource-circulating aluminium–air batteries.</span><span lang="ko">자원순환형 주유형 알루미늄 공기전지 국가 R&amp;D 사업단.</span></p>
+            <p class="note"><span lang="en">Technology survey and commercialisation-driver analysis feeding scenario construction, and LCOS-based techno-economic analysis; extending to remaining-useful-life-aware pricing as the technology matures.</span><span lang="ko">기술 조사와 기술사업화 영향요인 분석을 바탕으로 시나리오를 구축하고 LCOS 기반 경제성 분석을 담당. 기술 개발 완료 시 잔여수명 예측을 반영한 가격 산정까지 수행 예정.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2025.09<br>— <span lang="en">present</span><span lang="ko">현재</span></div>
+          <div class="what">
+            <h3><span lang="en">Lab Head — QMoT Lab, Sungkyunkwan University</span><span lang="ko">랩장 — 성균관대학교 QMoT Lab</span></h3>
+            <p class="sub"><span lang="en">Weekly seminars and lab meetings, research budget, software licensing and lab safety.</span><span lang="ko">주간 세미나·정기 랩미팅 기획 및 주도, 연구비·소프트웨어 라이선스·안전 관리 총괄.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2025.09<br>— 2026.12</div>
+          <div class="what">
+            <h3><span lang="en">Teaching Assistant — Quantitative Management Analysis</span><span lang="ko">조교 — 계량경영분석</span></h3>
+            <p class="sub"><span lang="en">Designed assignments on portfolio analysis, main path analysis and natural language processing; graded and gave feedback.</span><span lang="ko">포트폴리오 분석, Main Path 분석, 자연어처리 과제를 설계하고 제출물 채점과 피드백을 수행.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2024.03<br>— <span lang="en">present</span><span lang="ko">현재</span></div>
+          <div class="what">
+            <h3><span lang="en">Undergraduate → Graduate Researcher — Shell / BSP industrial collaboration</span><span lang="ko">학부연구생 → 대학원 연구원 — Shell·BSP 산업협력 과제</span></h3>
+            <p class="sub"><span lang="en">Led the full pipeline for offshore gas turbine shutdown detection: labelling, preprocessing, sensor selection, model design, experiments and the manuscript.</span><span lang="ko">해상 가스터빈 shutdown 조기 탐지의 데이터 라벨링·정제, 전처리, 센서 선택, 모델 구조 설계, 실험, 결과 분석, 논문 작성 전 과정 주도.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="awards">
+      <p class="eyebrow"><span lang="en">Awards &amp; Honors</span><span lang="ko">수상 및 장학</span><span>006</span></p>
+      <div class="entries">
+        <div class="entry">
+          <div class="when">2026.08</div>
+          <div class="what">
+            <h3><span lang="en">6th place — 3rd Wind Power Forecasting AI Competition, BARAM 2026</span><span lang="ko">최종 6위 — 제3회 풍력발전량 예측 AI 경진대회 BARAM 2026</span></h3>
+            <p class="sub"><span lang="en">DACON · 2,141 participants · team “바람난 발전소”. 1st on the public leaderboard, one of 16 teams advancing through artefact verification to the final presentation round.</span><span lang="ko">DACON · 참가 2,141명 · 팀 ‘바람난 발전소’. 리더보드 Public 1위, 산출물 검증을 통과한 최종 16팀으로 발표 평가 진출.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2026.08</div>
+          <div class="what">
+            <h3><span lang="en">4th of 40 second-round entrants — SCPC 2026 AI Challenge</span><span lang="ko">2차 예선 진출자 40명 중 4위 — 2026 SCPC AI 챌린지</span></h3>
+            <p class="sub"><span lang="en">Samsung Electronics · solo track · public score 0.8971 using the Python standard library alone.</span><span lang="ko">삼성전자 주최 · 개인전 · Python 표준 라이브러리만으로 public 0.8971.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2026.05</div>
+          <div class="what">
+            <h3><span lang="en">BK21 FOUR TA/RA Scholarship</span><span lang="ko">BK21 FOUR TA/RA 장학금</span></h3>
+            <p class="sub"><span lang="en">National Research Foundation of Korea · Sungkyunkwan University.</span><span lang="ko">한국연구재단 BK21 FOUR · 성균관대학교.</span></p>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="when">2024.12</div>
+          <div class="what">
+            <h3><span lang="en">Student Success Creative Scholarship — full tuition</span><span lang="ko">학생성공-창의장학 — 등록금 전액</span></h3>
+            <p class="sub"><span lang="en">Sungkyunkwan University · selected as the Department of Mathematics representative for academic excellence and creative project work.</span><span lang="ko">성균관대학교 · 학업 우수성과 창의적·도전적 활동 역량을 종합 평가받아 수학과 대표로 선발.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <p class="eyebrow"><span lang="en">Skills</span><span lang="ko">기술</span><span>007</span></p>
+      <div class="skills">
+        <div>
+          <h3>Languages</h3>
+          <p>Python, R, SQL, Kotlin, C</p>
+        </div>
+        <div>
+          <h3><span lang="en">Time series</span><span lang="ko">시계열</span></h3>
+          <p><span lang="en">Conv1D / LSTM autoencoders, iTransformer, state-space models (Mamba), anomaly detection, probabilistic forecasting, evaluation design</span><span lang="ko">Conv1D·LSTM 오토인코더, iTransformer, 상태공간 모델(Mamba), 이상탐지, 확률적 예측, 평가 설계</span></p>
+        </div>
+        <div>
+          <h3><span lang="en">Machine learning</span><span lang="ko">머신러닝</span></h3>
+          <p>PyTorch, scikit-learn, XGBoost, LightGBM, SHAP / PFI / PDP, ADASYN &amp; imbalance handling</p>
+        </div>
+        <div>
+          <h3>NLP &amp; LLM</h3>
+          <p>SBERT, FinBERT, Llama-3, UMAP + HDBSCAN, KeyBERT, w2v-bert-2.0, CTC</p>
+        </div>
+        <div>
+          <h3><span lang="en">Analysis</span><span lang="ko">분석</span></h3>
+          <p><span lang="en">LCOS techno-economic analysis, main path analysis, portfolio analysis, experimental design</span><span lang="ko">LCOS 경제성 분석, Main Path 분석, 포트폴리오 분석, 실험 설계</span></p>
+        </div>
+        <div>
+          <h3><span lang="en">Certification</span><span lang="ko">자격</span></h3>
+          <p>Microsoft Office Specialist (Expert)</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 <span lang="en">Mano Hong</span><span lang="ko">홍마노</span></span>
+      <span><span lang="en">Last updated</span><span lang="ko">최종 수정</span> 2026.08</span>
+    </footer>
+
+  </main>
 </div>
+
+<script>
+(function(){
+  var root = document.documentElement;
+
+  var langBtn = document.getElementById('lang-btn');
+  function setLang(l){
+    root.setAttribute('data-lang', l);
+    langBtn.textContent = (l === 'en') ? '한국어' : 'English';
+  }
+  setLang('en');
+  langBtn.addEventListener('click', function(){
+    setLang(root.getAttribute('data-lang') === 'en' ? 'ko' : 'en');
+  });
+
+  var themeBtn = document.getElementById('theme-btn');
+  function isDark(){
+    var t = root.getAttribute('data-theme');
+    if (t) return t === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function syncThemeLabel(){ themeBtn.textContent = isDark() ? 'Light' : 'Dark'; }
+  syncThemeLabel();
+  themeBtn.addEventListener('click', function(){
+    root.setAttribute('data-theme', isDark() ? 'light' : 'dark');
+    syncThemeLabel();
+    draw(1);
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('.railnav a'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        var i = sections.indexOf(e.target);
+        links.forEach(function(a, j){
+          if (j === i) a.setAttribute('aria-current','true');
+          else a.removeAttribute('aria-current');
+        });
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    sections.forEach(function(s){ if (s) io.observe(s); });
+  }
+
+  var cv = document.getElementById('trace');
+  var ctx = cv.getContext('2d');
+  var N = 320, FLAG = 0.72;
+  var series = [];
+  (function build(){
+    var seed = 20260831;
+    function rnd(){ seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+    var drift = 0;
+    for (var i = 0; i < N; i++){
+      var t = i / (N - 1);
+      var ramp = t < FLAG - 0.16 ? 0 : Math.pow((t - (FLAG - 0.16)) / (1 - (FLAG - 0.16)), 1.7);
+      drift = drift * 0.86 + (rnd() - 0.5) * 0.16;
+      var burst = (t > FLAG - 0.02 && rnd() > 0.72) ? rnd() * 0.12 : 0;
+      series.push(Math.max(0.02, 0.20 + drift * 0.10 + ramp * 0.62 + burst));
+    }
+  })();
+
+  function css(v){ return getComputedStyle(root).getPropertyValue(v).trim(); }
+
+  function draw(progress){
+    var dpr = window.devicePixelRatio || 1;
+    var w = cv.clientWidth, h = 132;
+    cv.width = w * dpr; cv.height = h * dpr;
+    cv.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    var pad = 10, top = 10, bottom = h - 14;
+    var line = css('--line'), accent = css('--accent'), alarm = css('--alarm'), faint = css('--faint');
+    var thr = 0.62;
+    function y(v){ return bottom - v * (bottom - top); }
+    function x(i){ return pad + (i / (N - 1)) * (w - pad * 2); }
+
+    ctx.strokeStyle = line; ctx.lineWidth = 1;
+    [0.25, 0.5, 0.75].forEach(function(g){
+      ctx.beginPath(); ctx.moveTo(pad, Math.round(y(g)) + .5); ctx.lineTo(w - pad, Math.round(y(g)) + .5); ctx.stroke();
+    });
+
+    ctx.save();
+    ctx.strokeStyle = alarm; ctx.setLineDash([3, 4]); ctx.lineWidth = 1; ctx.globalAlpha = .7;
+    ctx.beginPath(); ctx.moveTo(pad, Math.round(y(thr)) + .5); ctx.lineTo(w - pad, Math.round(y(thr)) + .5); ctx.stroke();
+    ctx.restore();
+
+    var upto = Math.max(2, Math.floor(N * progress));
+
+    ctx.beginPath(); ctx.moveTo(x(0), bottom);
+    for (var i = 0; i < upto; i++) ctx.lineTo(x(i), y(series[i]));
+    ctx.lineTo(x(upto - 1), bottom); ctx.closePath();
+    ctx.globalAlpha = .10; ctx.fillStyle = accent; ctx.fill(); ctx.globalAlpha = 1;
+
+    ctx.beginPath();
+    for (var j = 0; j < upto; j++){ j ? ctx.lineTo(x(j), y(series[j])) : ctx.moveTo(x(j), y(series[j])); }
+    ctx.strokeStyle = accent; ctx.lineWidth = 1.4; ctx.lineJoin = 'round'; ctx.stroke();
+
+    var fi = Math.floor(N * FLAG);
+    if (upto > fi){
+      var fx = x(fi), fy = y(series[fi]);
+      ctx.save();
+      ctx.strokeStyle = alarm; ctx.globalAlpha = .45; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(Math.round(fx) + .5, top); ctx.lineTo(Math.round(fx) + .5, bottom); ctx.stroke();
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(fx, fy, 3.2, 0, Math.PI * 2);
+      ctx.fillStyle = alarm; ctx.fill();
+      ctx.strokeStyle = css('--surface'); ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    var lx = x(upto - 1), ly = y(series[upto - 1]);
+    ctx.beginPath(); ctx.arc(lx, ly, 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = faint; ctx.fill();
+  }
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce){
+    draw(1);
+  } else {
+    var start = null;
+    requestAnimationFrame(function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min(1, (ts - start) / 2200);
+      draw(p * p * (3 - 2 * p));
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+  var rt;
+  window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(function(){ draw(1); }, 120); });
+})();
+</script>
+</body>
+</html>
