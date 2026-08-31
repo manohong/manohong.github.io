@@ -68,6 +68,8 @@ body{
   font-size:var(--step);
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
+  word-break:keep-all;
+  overflow-wrap:break-word;
 }
 a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
@@ -716,6 +718,8 @@ footer{
       if (p < 1) requestAnimationFrame(step);
     });
   }
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) draw(1); });
+  setTimeout(function(){ draw(1); }, 3000);
   var rt;
   window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(function(){ draw(1); }, 120); });
 })();
