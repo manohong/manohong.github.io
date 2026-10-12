@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="780" viewBox="0 0 1600 780" role="img" aria-labelledby="title desc">
+  <title id="title">나라장터 입찰공고 법령위반 판정 파이프라인</title>
+  <desc id="desc">공고와 첨부문서에서 근거를 추출하고 법령 검색 결과와 결정론 규칙으로 24개 항목을 판정한 뒤 원문 인용을 확인하는 구조와 점수 개선 과정을 보여준다.</desc>
+  <rect width="1600" height="780" fill="#ffffff"/>
+  <g font-family="Arial, 'Noto Sans KR', sans-serif">
+    <text x="64" y="72" fill="#1d2530" font-size="42" font-weight="700">LLM은 읽고, 규칙은 판정한다</text>
+    <text x="64" y="112" fill="#65717a" font-size="23">Frozen LLM · 24 compliance items · evidence-grounded, fail-closed decision</text>
+
+    <g transform="translate(64 180)">
+      <rect x="0" y="0" width="250" height="170" rx="22" fill="#f3f5f6" stroke="#cbd3d8" stroke-width="3"/>
+      <text x="125" y="57" text-anchor="middle" fill="#1d2530" font-size="28" font-weight="700">입찰공고</text>
+      <text x="125" y="94" text-anchor="middle" fill="#1d2530" font-size="28" font-weight="700">+ 첨부문서</text>
+      <text x="125" y="135" text-anchor="middle" fill="#65717a" font-size="20">median 13K chars</text>
+
+      <path d="M270 85 H330" stroke="#8a959d" stroke-width="5" fill="none"/>
+      <path d="M330 85 l-18 -11 v22 z" fill="#8a959d"/>
+
+      <rect x="350" y="0" width="250" height="170" rx="22" fill="#eef1fb" stroke="#6a78b8" stroke-width="3"/>
+      <text x="475" y="57" text-anchor="middle" fill="#273a7a" font-size="28" font-weight="700">근거 추출</text>
+      <text x="475" y="96" text-anchor="middle" fill="#273a7a" font-size="24">Gemma 4 26B</text>
+      <text x="475" y="135" text-anchor="middle" fill="#65717a" font-size="20">facts + quoted spans</text>
+
+      <path d="M620 85 H680" stroke="#8a959d" stroke-width="5" fill="none"/>
+      <path d="M680 85 l-18 -11 v22 z" fill="#8a959d"/>
+
+      <rect x="700" y="0" width="250" height="170" rx="22" fill="#fff7e4" stroke="#bd860f" stroke-width="3"/>
+      <text x="825" y="57" text-anchor="middle" fill="#7d5909" font-size="28" font-weight="700">법령 RAG</text>
+      <text x="825" y="96" text-anchor="middle" fill="#7d5909" font-size="24">BM25 · 3,211 blocks</text>
+      <text x="825" y="135" text-anchor="middle" fill="#65717a" font-size="20">system-only context</text>
+
+      <path d="M970 85 H1030" stroke="#8a959d" stroke-width="5" fill="none"/>
+      <path d="M1030 85 l-18 -11 v22 z" fill="#8a959d"/>
+
+      <rect x="1050" y="0" width="250" height="170" rx="22" fill="#e8f4ef" stroke="#2e8764" stroke-width="3"/>
+      <text x="1175" y="57" text-anchor="middle" fill="#176046" font-size="28" font-weight="700">결정론 판정</text>
+      <text x="1175" y="96" text-anchor="middle" fill="#176046" font-size="24">judge() · 24 items</text>
+      <text x="1175" y="135" text-anchor="middle" fill="#65717a" font-size="20">rules + complete gates</text>
+
+      <path d="M1175 187 V232" stroke="#8a959d" stroke-width="5" fill="none"/>
+      <path d="M1175 232 l-11 -18 h22 z" fill="#8a959d"/>
+      <rect x="1020" y="250" width="310" height="112" rx="20" fill="#fff0ef" stroke="#b25f55" stroke-width="3"/>
+      <text x="1175" y="296" text-anchor="middle" fill="#913f37" font-size="27" font-weight="700">Fail-closed 검증</text>
+      <text x="1175" y="333" text-anchor="middle" fill="#65717a" font-size="20">원문 인용 실패 시 이전 값 복원</text>
+    </g>
+
+    <g transform="translate(64 600)">
+      <text x="0" y="-36" fill="#1d2530" font-size="25" font-weight="700">Private leaderboard progression</text>
+      <line x1="0" y1="60" x2="1400" y2="60" stroke="#d9dfe2" stroke-width="4"/>
+      <polyline points="70,60 470,60 870,60 1270,60" fill="none" stroke="#1c5f6b" stroke-width="7"/>
+      <g fill="#1c5f6b" stroke="#ffffff" stroke-width="5">
+        <circle cx="70" cy="60" r="14"/><circle cx="470" cy="60" r="14"/><circle cx="870" cy="60" r="14"/><circle cx="1270" cy="60" r="18"/>
+      </g>
+      <g fill="#1d2530" font-size="24" font-weight="700" text-anchor="middle">
+        <text x="70" y="25">0.2128</text><text x="470" y="25">0.6046</text><text x="870" y="25">0.75231</text><text x="1270" y="20">0.7838 · 1st</text>
+      </g>
+      <g fill="#65717a" font-size="19" text-anchor="middle">
+        <text x="70" y="104">baseline</text><text x="470" y="104">LLM direct</text><text x="870" y="104">extract → decide</text><text x="1270" y="104">final fail-closed</text>
+      </g>
+    </g>
+  </g>
+</svg>
